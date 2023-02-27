@@ -1,22 +1,22 @@
 {
-    "manifest_version": 3,
     "name": "Smart Clipboard",
     "version": "1.0",
-    "description": "Automatically categorizes copied content into different sections and saves them for easy access later on.",
-    "permissions": [
-      "clipboardRead",
-      "clipboardWrite"
-    ],
+    "description": "Automatically categorizes copied content into different sections, such as text, links, images, and files, and saves them for easy access later on.",
+    "permissions": ["clipboardRead", "clipboardWrite"],
     "icons": {
-      "16": "icon16.png",
-      "48": "icon48.png",
-      "128": "icon128.png"
+        "16": "icons/icon16.png",
+        "32": "icons/icon32.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
     },
     "background": {
-      "scripts": ["background.js"],
-      "persistent": true
+        "scripts": ["background.js"],
+        "persistent": false
     },
-    "browser_action": {
-      "default_popup": "popup.html"
-    }
-  }
+    "options_page": "options.html",
+    "content_scripts": [{
+        "matches": ["<all_urls>"],
+        "js": ["content.js"]
+    }],
+    "manifest_version": 2
+}
