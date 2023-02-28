@@ -1,3 +1,12 @@
+//callback function will be called when the response is sent back from the background script.
+chrome.runtime.sendMessage({action: "copy"}, function(response) {
+    if (response.success) {
+      console.log("Copy successful!");
+    } else {
+      console.log("Copy failed.");
+    }
+});
+
 function copyHandler(e) {
     const clipboardData = e.clipboardData || window.clipboardData;
     let clipboardItem = {};
