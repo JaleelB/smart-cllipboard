@@ -13,20 +13,20 @@ function copyHandler(e) {
 
     if (clipboardData && clipboardData.items) {
         for (var i = 0; i < clipboardData.items.length; i++) {
-            var item = clipboardData.items[i];
+            const item = clipboardData.items[i];
 
             if (item.type.indexOf("text") !== -1) {
                 item.getAsString(function(text) {
                     clipboardItem = { type: "string", src: text };
-                    chrome.runtime.sendMessage({ action: "copy", data: clipboardItem });
+                    // chrome.runtime.sendMessage({ action: "copy", data: clipboardItem });
                 });
             } else if (item.type.indexOf("image") !== -1) {
-                var blob = item.getAsFile();
-                var reader = new FileReader();
+                const blob = item.getAsFile();
+                const reader = new FileReader();
 
                 reader.onloadend = function() {
                     clipboardItem = { type: "image", src: reader.result };
-                    chrome.runtime.sendMessage({ action: "copy", data: clipboardItem });
+                    // chrome.runtime.sendMessage({ action: "copy", data: clipboardItem });
                 };
 
                 reader.readAsDataURL(blob);
@@ -34,17 +34,22 @@ function copyHandler(e) {
                 clipboardItem = { type: "link", href: item.getData("text/plain") };
                 chrome.runtime.sendMessage({ action: "copy", data: clipboardItem });
             } else if (item.kind === "file") {
-                var blob = item.getAsFile();
-                var reader = new FileReader();
+                const blob = item.getAsFile();
+                const reader = new FileReader();
 
                 reader.onloadend = function() {
                     clipboardItem = { type: "file", src: reader.result };
-                    chrome.runtime.sendMessage({ action: "copy", data: clipboardItem });
+                    // chrome.runtime.sendMessage({ action: "copy", data: clipboardItem });
                 };
 
                 reader.readAsDataURL(blob);
             }
         }
+
+        chrome.runtime.sendMessage({
+            action: "copy",
+            data: data
+        });
     }
 }
 
