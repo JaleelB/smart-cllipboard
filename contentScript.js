@@ -1,23 +1,3 @@
-//callback function will be called when the response is sent back from the background script.
-chrome.runtime.sendMessage({ action: "copy", data: clipboardItem }, function(response) {
-    if (!response) {
-        // Handle the case where no response is received
-        console.log("Error: no response received from background script.");
-    } else if (response.success) {
-        // Handle the case where the response is successful
-        console.log("Success: clipboard item copied to background script.");
-    } else {
-        // Handle the case where the response is not successful
-        console.log("Error: clipboard item not copied to background script.");
-    }
-});
-
-// Add a timeout to the sendMessage call
-setTimeout(function() {
-    console.log("Error: no response received from background script within timeout period.");
-}, 5000); // 5-second timeout
-
-
 function copyHandler(e) {
     console.log(e)
     const clipboardData = e.clipboardData || window.clipboardData;
@@ -59,10 +39,29 @@ function copyHandler(e) {
             }
         }
 
-        chrome.runtime.sendMessage({
-            action: "copy",
-            data: clipboardItem
+        // chrome.runtime.sendMessage({
+        //     action: "copy",
+        //     data: clipboardItem
+        // });
+
+        //callback function will be called when the response is sent back from the background script.
+        chrome.runtime.sendMessage({ action: "copy", data: clipboardItem }, function(response) {
+            if (!response) {
+                // Handle the case where no response is received
+                console.log("Error: no response received from background script.");
+            } else if (response.success) {
+                // Handle the case where the response is successful
+                console.log("Success: clipboard item copied to background script.");
+            } else {
+                // Handle the case where the response is not successful
+                console.log("Error: clipboard item not copied to background script.");
+            }
         });
+
+        // Add a timeout to the sendMessage call
+        setTimeout(function() {
+            console.log("Error: no response received from background script within timeout period.");
+        }, 5000); // 5-second timeout
     }
 }
 
