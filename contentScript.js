@@ -1,19 +1,32 @@
 //callback function will be called when the response is sent back from the background script.
-chrome.runtime.sendMessage({action: "copy"}, function(response) {
-    if (response.success) {
-      console.log("Copy successful!");
+chrome.runtime.sendMessage({ action: "copy", data: clipboardItem }, function(response) {
+    if (!response) {
+        // Handle the case where no response is received
+        console.log("Error: no response received from background script.");
+    } else if (response.success) {
+        // Handle the case where the response is successful
+        console.log("Success: clipboard item copied to background script.");
     } else {
-      console.log("Copy failed.");
+        // Handle the case where the response is not successful
+        console.log("Error: clipboard item not copied to background script.");
     }
 });
 
+// Add a timeout to the sendMessage call
+setTimeout(function() {
+    console.log("Error: no response received from background script within timeout period.");
+}, 5000); // 5-second timeout
+
+
 function copyHandler(e) {
+    console.log(e)
     const clipboardData = e.clipboardData || window.clipboardData;
     let clipboardItem = {};
 
     if (clipboardData && clipboardData.items) {
-        for (var i = 0; i < clipboardData.items.length; i++) {
+        for (const i = 0; i < clipboardData.items.length; i++) {
             const item = clipboardData.items[i];
+            console.log(item)
 
             if (item.type.indexOf("text") !== -1) {
                 item.getAsString(function(text) {
@@ -48,7 +61,7 @@ function copyHandler(e) {
 
         chrome.runtime.sendMessage({
             action: "copy",
-            data: data
+            data: clipboardItem
         });
     }
 }
