@@ -1,63 +1,64 @@
-function copyHandler(e) {
-    console.log(e)
-    const clipboardData = e.clipboardData || window.clipboardData;
-    let clipboardItem = {};
-
-    if (clipboardData && clipboardData.items) {
-        for (const i = 0; i < clipboardData.items.length; i++) {
-            const item = clipboardData.items[i];
-            console.log(item)
-
-            if (item.type.indexOf("text") !== -1) {
-                item.getAsString(function(text) {
-                    clipboardItem = { type: "string", src: text };
-                    // chrome.runtime.sendMessage({ action: "copy", data: clipboardItem });
-                });
-            } else if (item.type.indexOf("image") !== -1) {
-                const blob = item.getAsFile();
-                const reader = new FileReader();
-
-                reader.onloadend = function() {
-                    clipboardItem = { type: "image", src: reader.result };
-                    // chrome.runtime.sendMessage({ action: "copy", data: clipboardItem });
-                };
-
-                reader.readAsDataURL(blob);
-            } else if (item.type.indexOf("url") !== -1) {
-                clipboardItem = { type: "link", href: item.getData("text/plain") };
-                chrome.runtime.sendMessage({ action: "copy", data: clipboardItem });
-            } else if (item.kind === "file") {
-                const blob = item.getAsFile();
-                const reader = new FileReader();
-
-                reader.onloadend = function() {
-                    clipboardItem = { type: "file", src: reader.result };
-                    // chrome.runtime.sendMessage({ action: "copy", data: clipboardItem });
-                };
-
-                reader.readAsDataURL(blob);
-            }
+console.log("Content script running")
+function handleCopyEvent(event) {
+    const data = {
+    //   text: '',
+    //   html: '',
+      items: [],
+    };
+  
+    // Get the selected text, if any
+    const selectedText = window.getSelection().toString().trim();
+    console.log(selectedText)
+    if (selectedText) {
+      data.items.push({ type: 'text', data: selectedText });
+    }
+  
+    // Get the HTML content, if any
+    const selectedHtml = window.getSelection().anchorNode.parentNode.innerHTML.trim();
+    console.log(selectedHtml)
+    if (selectedHtml) {
+      data.items.push({ type: 'html', data: selectedHtml });
+    }
+  
+    // Get the copied items, if any
+    const clipboardData = event.clipboardData || window.clipboardData;
+    console.log("clipboard", clipboardData);
+    if (clipboardData) {
+        console.log("clipboard", clipboardData);
+      const types = clipboardData.types;
+      for (let i = 0; i < types.length; i++) {
+        const type = types[i];
+        const item = clipboardData.getData(type);
+        switch (type) {
+          case 'text/plain':
+            data.items.push({ type: 'text', data: item });
+            break;
+          case 'text/html':
+            data.items.push({ type: 'html', data: item });
+            break;
+          case 'image/png':
+          case 'image/jpeg':
+          case 'image/gif':
+            data.items.push({ type: 'image', data: item });
+            break;
+          default:
+            data.items.push({ type: 'file', data: item });
+            break;
         }
-
-        sendMessageToBackgroundScript({
-            action: "copy",
-            data: clipboardItem
+      }
+    }
+  
+    // Send the data to the background script
+    if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage({ type: 'clipboard-data', data }, (response) => {
+        if (response.success) {
+            console.log('Copied items categorized successfully');
+        } else {
+            console.error('Failed to categorize copied items');
+        }
         });
     }
-}
-
-function sendMessageToBackgroundScript(message, callback) {
-    chrome.runtime.sendMessage(message, function(response) {
-        if (chrome.runtime.lastError) {
-            console.log(chrome.runtime.lastError);
-        } else if (!response) {
-            console.log("Error: no response received from background script.");
-        } else if (response.success) {
-            console.log("Success: clipboard item copied to background script.");
-        } else {
-            console.log("Error: clipboard item not copied to background script.");
-        }
-    });
-}
-
-document.addEventListener("copy", copyHandler);
+  }
+  
+  document.addEventListener('copy', handleCopyEvent);
+  
