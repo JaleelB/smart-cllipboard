@@ -1,39 +1,72 @@
-//listener to detect when the user copies content to the clipboard.
-// IT categorize the copied data into text, images, links, or files based on its type.
-//Then, storesthe data into the appropriate storage area (text, images, links, or files) using Chrome's storage API.
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    
-    if (message.action == "copy") {
-        chrome.storage.local.get("clipboard", function(result) {
-            console.log(result)
-            let clipboard = result.clipboard || {
-                text: [],
-                images: [],
-                links: [],
-                files: []
-            };
+console.log("Background script running")
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+if (request.type === 'clipboard-data') {
+    // const { text, html, items } = request.data;
+    const { items } = request.data;
 
-            if (message.data.type == "string" && clipboard.text.indexOf(message.data.src) == -1) {
-                clipboard.text.unshift(message.data.src);
-            } else if (message.data.type == "image" && clipboard.images.indexOf(message.data.src) == -1) {
-                clipboard.images.unshift(message.data.src);
-            } else if (message.data.type == "link" && clipboard.links.indexOf(message.data.href) == -1) {
-                clipboard.links.unshift(message.data.href);
-            } else if (message.data.type == "file" && clipboard.files.indexOf(message.data.src) == -1) {
-                clipboard.files.unshift(message.data.src);
+    console.log("items: ", items)
+
+    const categories = {
+        text: [],
+        link: [],
+        image: [],
+        file: [],
+    };
+
+    // Categorize the copied items
+    items.forEach((item) => {
+    if (item.type === 'text') {
+        categories.text.push(item);
+    } else if (item.type === 'html') {
+        if (typeof DOMParser !== 'undefined') {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(item.data, 'text/html');
+            const links = doc.querySelectorAll('a');
+            const images = doc.querySelectorAll('img');
+            const files = doc.querySelectorAll('a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".ppt"], a[href$=".pptx"]');
+  
+            if (links.length > 0) {
+              categories.link.push(...links);
             }
-
-            chrome.storage.local.set({clipboard: clipboard}, function() {
-                if (chrome.runtime.lastError) {
-                    console.error(chrome.runtime.lastError);
-                    sendResponse({success: false});
-                } else if (sendResponse) {
-                    sendResponse({success: true});
-                }
-            });
-            
-        });
-
-        return true;
+  
+            if (images.length > 0) {
+              categories.image.push(...images);
+            }
+  
+            if (files.length > 0) {
+              categories.file.push(...files);
+            }
+        }
+    } else if (item.type === 'image') {
+        categories.image.push(item);
+    } else if (item.type === 'file') {
+        categories.file.push(item);
     }
+    });
+
+    // Save the categorized items to storage
+    chrome.storage.local.get(['text', 'link', 'image', 'file'], (result) => {
+        // const { text: storedText, link: storedLink, image: storedImage, file: storedFile } = result;
+
+        const storedText = result.text ?? [];
+        const storedLink = result.link ?? [];
+        const storedImage = result.image ?? [];
+        const storedFile = result.file ?? [];
+
+        console.log(storedText, storedLink, storedImage, storedFile)
+
+        chrome.storage.local.set({
+            text: [...storedText, ...categories.text],
+            link: [...storedLink, ...categories.link],
+            image: [...storedImage, ...categories.image],
+            file: [...storedFile, ...categories.file],
+        }, () => {
+            sendResponse({ success: true });
+        });
+    });
+
+    return true; // required to keep the message channel open until async task completes
+}
 });
+
+  
