@@ -5,13 +5,14 @@
     --gap-2: 8px;
     --color-white: #ffff;
     --border-color: #ebebeb;
+    --color-primary: #4608ad;
 }
 
 body, html{ padding: 0; margin: 0; }
 
 .container{
-    width: 370px;
-    height: 650px;
+    width: 496px;
+    height: 600px;
     background-color: var(--color-white);
     line-height: 1.5;
 }
@@ -22,7 +23,9 @@ header{
     justify-content: space-between;
     align-items: center;
     height: 2rem;
+    background-color: var(--color-primary);
     border-bottom: 1px solid var(--border-color);
+    color: var(--color-white);
 }
 
 header .wrapper{
@@ -43,15 +46,15 @@ header .close{
     top: 22px;
     width: 30px;
     height: 30px;
-    opacity: 0.3;
+    /* opacity: 0.3; */
 }
 
-header .close:hover {
+/* header .close:hover {
     opacity: 1;
-}
+} */
 
 header .close:before, .close:after {
-    --btn-color: #333; 
+    --btn-color: rgb(255, 255, 255); 
     position: absolute;
     content: ' ';
     left: 15px;
@@ -81,8 +84,16 @@ header .close:after {
     text-transform: uppercase;
 }
 
+.active-tab{
+    --highlight-color: #f4f1fa;
+    border-bottom: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    background-color: var(--highlight-color);
+}
+
 .tab-items{
     width: 100%;
     min-height: 300px;
     padding: var(--gap-2); 
 }
+
