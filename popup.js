@@ -11,7 +11,7 @@ function setActiveTab(activeTabIndex){
         activeTab = tabs[activeTabIndex];
         activeTab.classList.add("active-tab");
     }else{
-        activeTab.classList.remove("active-tab");
+        activeTa.classList.remove("active-tab");
         activeTab = tabs[activeTabIndex];
         activeTab.classList.add("active-tab");
     }
@@ -24,4 +24,10 @@ tabs.forEach((tab, index) => {
       activeTabIndex = index;
       setActiveTab(activeTabIndex);
     });
+});
+
+
+const closeButton = document.querySelector('.close');
+closeButton.addEventListener('click', () => {
+  window.close();
 });
