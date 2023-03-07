@@ -24,48 +24,61 @@ tabs.forEach((tab, index) => {
     });
 });
 
-
 // Get the clipboard data from the background script
-chrome.runtime.sendMessage({ type: 'get-clipboard-data' }, (response) => {
-    console.log(response)
-    if (chrome.runtime.lastError) { // if there was an error in accessing clipboard data
-        document.querySelector(".tab-items").innerHTML = `<li class="error-message">${chrome.runtime.lastError.message}</li>`;
-        return;
-    }
-
-    if (response && response.success) {
-
-        const [] d = response.data;
-        const activeTab = document.querySelector('.active-tab');
-        const activeTabClasses = activeTab.classList;
-        const activeTabItems = items.filter((item) => item.type === activeTab.textContent);
-        const tabItems = document.querySelector('.tab-items');
-
-        if (activeTabItems.length === 0) {
-            const error = document.createElement('div');
-            error.className = 'error';
-            error.textContent = `No ${type} items found in clipboard`;
-            tabItems.appendChild(error);
-        }else{
-            console.log("first")
+function showClipboardItems() {
+    chrome.runtime.sendMessage({ type: 'get-clipboard-data' }, (response) => {
+        
+        if (chrome.runtime.lastError) { // if there was an error in accessing clipboard data
+            document.querySelector(".tab-items").innerHTML = `<li class="error-message">${chrome.runtime.lastError.message}</li>`;
+            return;
         }
 
-        console.log(activeTabClasses, activeTabItems)
+        if (response && response.success) {
 
-    }else {
-        // Handle the case where the response is undefined or doesn't have a success property
-        const errorMessage = document.createElement('li');
-        const tabItems = document.querySelector('.tab-items');
+            const { text, file, image, link } = response.data;
+            const clipboardData = [ ...text, ...file, ...image, ...link  ];
+            console.log(clipboardData)
+            const activeTab = document.querySelector('.active-tab');
+            // const activeTabClasses = activeTab.classList;
+            const activeTabItems = clipboardData.filter((clipboardItem) => clipboardItem.type === activeTab.textContent);
 
-        errorMessage.classList.add('error');
-        errorMessage.textContent = 'Unable to access clipboard data. Please try again.';
-        
-        tabItems.style.display = 'grid';
-        tabItems.style.placeItems = 'center';
-        tabItems.style.fontSize = '15px';
-        tabItems.appendChild(errorMessage);
-    }
-});
+            if (activeTabItems.length === 0) {
+                const error = document.createElement('div');
+                error.className = 'error';
+                error.textContent = `No ${type} items found in clipboard`;
+                tabItems.appendChild(error);
+            }else{
+                activeTabItems.forEach((item) => {
+                    const li = document.createElement('li');
+                    li.classList.add("tab-item")
+
+                    if (item.type === 'text') {
+                    li.textContent = item.data;
+                    } else if (item.type === 'link' || item.type === 'image' || item.type === 'file') {
+                    const link = document.createElement('a');
+                    link.href = item.data;
+                    link.textContent = item.data;
+                    li.appendChild(link);
+                    }
+                    tabItems.appendChild(li);
+                });
+            }
+
+        }else {
+            // Handle the case where the response is undefined or doesn't have a success property
+            const errorMessage = document.createElement('li');
+            const tabItems = document.querySelector('.tab-items');
+
+            errorMessage.classList.add('error');
+            errorMessage.textContent = 'Unable to access clipboard data. Please try again.';
+            
+            tabItems.style.display = 'grid';
+            tabItems.style.placeItems = 'center';
+            tabItems.style.fontSize = '15px';
+            tabItems.appendChild(errorMessage);
+        }
+    });
+}
 
 const closeButton = document.querySelector('.close');
 closeButton.addEventListener('click', () => {
