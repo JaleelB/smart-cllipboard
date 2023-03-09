@@ -15,12 +15,12 @@ function setActiveTab(activeTabIndex){
     }
 
 }
-setActiveTab(activeTabIndex)
 
 tabs.forEach((tab, index) => {
     tab.addEventListener('click', () => {
       activeTabIndex = index;
       setActiveTab(activeTabIndex);
+      showClipboardItems()
     });
 });
 
@@ -37,9 +37,9 @@ function showClipboardItems() {
 
             const { text, file, image, link } = response.data;
             const clipboardData = [ ...text, ...file, ...image, ...link  ];
-            console.log(clipboardData)
+            
             const activeTab = document.querySelector('.active-tab');
-            // const activeTabClasses = activeTab.classList;
+            tabItems.innerHTML = "";
             const activeTabItems = clipboardData.filter((clipboardItem) => clipboardItem.type === activeTab.textContent);
 
             if (activeTabItems.length === 0) {
@@ -53,12 +53,12 @@ function showClipboardItems() {
                     li.classList.add("tab-item")
 
                     if (item.type === 'text') {
-                    li.textContent = item.data;
+                        li.textContent = item.data;
                     } else if (item.type === 'link' || item.type === 'image' || item.type === 'file') {
-                    const link = document.createElement('a');
-                    link.href = item.data;
-                    link.textContent = item.data;
-                    li.appendChild(link);
+                        const link = document.createElement('a');
+                        link.href = item.data;
+                        link.textContent = item.data;
+                        li.appendChild(link);
                     }
                     tabItems.appendChild(li);
                 });
@@ -84,3 +84,6 @@ const closeButton = document.querySelector('.close');
 closeButton.addEventListener('click', () => {
   window.close();
 });
+
+setActiveTab(activeTabIndex)
+showClipboardItems();// render the clipboard items on popup load

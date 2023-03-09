@@ -13,30 +13,46 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             file: [],
         };
 
+        //provide a fallback implementation if the DOMParser class is not defined.
+        const parseHtml = (htmlString) => {
+            const parser = typeof DOMParser !== 'undefined' ? new DOMParser() : {
+              parseFromString: (str, contentType) => {
+                const doc = document.implementation.createHTMLDocument('');
+                doc.documentElement.innerHTML = str;
+                return doc;
+              }
+            };
+            return parser.parseFromString(htmlString, 'text/html');
+        }
+
         // Categorize the copied items
         items.forEach((item) => {
         if (item.type === 'text') {
             categories.text.push(item);
         } else if (item.type === 'html') {
-            if (typeof DOMParser !== 'undefined') {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(item.data, 'text/html');
+            try {
+                const doc = parseHtml(item.data);
                 const links = doc.querySelectorAll('a');
                 const images = doc.querySelectorAll('img');
                 const files = doc.querySelectorAll('a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".ppt"], a[href$=".pptx"]');
+                console.log("images: ", images);
     
                 if (links.length > 0) {
-                categories.link.push(...links);
+                    categories.link.push(...links);
                 }
     
                 if (images.length > 0) {
-                categories.image.push(...images);
+                    categories.image.push(...images);
                 }
     
                 if (files.length > 0) {
-                categories.file.push(...files);
+                    categories.file.push(...files);
                 }
+            } catch (err) {
+                console.error(err);
             }
+            
+            // }
         } else if (item.type === 'image') {
             categories.image.push(item);
         } else if (item.type === 'file') {
@@ -53,8 +69,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const storedImage = result.image ?? [];
             const storedFile = result.file ?? [];
 
-            console.log(storedText, storedLink, storedImage, storedFile)
-
             chrome.storage.local.set({
                 text: [...storedText, ...categories.text],
                 link: [...storedLink, ...categories.link],
@@ -69,12 +83,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     else if (request.type === 'get-clipboard-data') {
         chrome.storage.local.get(['text', 'link', 'image', 'file'], (data) => {
-        if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError);
-            sendResponse({ success: false, message: 'Could not retrieve clipboard data.' });
-        } else {
-            sendResponse({ success: true, data });
-        }
+            console.log(data)
+            if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError);
+                sendResponse({ success: false, message: 'Could not retrieve clipboard data.' });
+            } else {
+                sendResponse({ success: true, data });
+            }
+
         });
         return true;
     }
