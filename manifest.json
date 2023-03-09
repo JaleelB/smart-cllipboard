@@ -2,7 +2,7 @@
     "name": "Smart Clipboard",
     "version": "1.0",
     "description": "Automatically categorizes copied content into different sections, such as text, links, images, and files, and saves them for easy access later on.",
-    "permissions": ["clipboardRead", "clipboardWrite", "storage", "tabs"],
+    "permissions": ["clipboardRead", "clipboardWrite", "storage", "activeTab"],
     "background": {
         "service_worker": "background.js"
     },
