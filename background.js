@@ -1,4 +1,15 @@
 console.log("Background script running")
+
+chrome.runtime.onInstalled.addListener(function() {
+    //sets initial copied clipboard storage state
+    chrome.storage.local.set({
+        text: [],
+        link: [],
+        image: [],
+        file: [],
+    });
+});
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     if (request.type === 'clipboard-data') {
