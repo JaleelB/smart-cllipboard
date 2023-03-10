@@ -20,6 +20,7 @@ tabs.forEach((tab, index) => {
     tab.addEventListener('click', () => {
       activeTabIndex = index;
       setActiveTab(activeTabIndex);
+      tabItems.innerHTML = "";
       showClipboardItems()
     });
 });
@@ -35,31 +36,47 @@ function showClipboardItems() {
 
         if (response && response.success) {
 
-            const { text, file, image, link } = response.data;
-            const clipboardData = [ ...text, ...file, ...image, ...link  ];
+            const { file, image, link } = response.data;
+            console.log(file, image, link)
+            const clipboardData = [  
+                ...(file.length > 0 ? file : []),
+                ...(image.length > 0 ? image : []),
+                ...(link.length > 0 ? link : []),
+            ]
             
             const activeTab = document.querySelector('.active-tab');
-            tabItems.innerHTML = "";
             const activeTabItems = clipboardData.filter((clipboardItem) => clipboardItem.type === activeTab.textContent);
+            activeTabItems.reverse(); // shows the latest addition to the clipboard as the first item
 
             if (activeTabItems.length === 0) {
                 const error = document.createElement('div');
                 error.className = 'error';
-                error.textContent = `No ${type} items found in clipboard`;
+                error.textContent = `No ${activeTab.textContent} found in clipboard`;
+                tabItems.style.display = 'grid';
+                tabItems.style.placeItems = 'center'
                 tabItems.appendChild(error);
             }else{
                 activeTabItems.forEach((item) => {
+                    console.log("tab item: ", item)
                     const li = document.createElement('li');
                     li.classList.add("tab-item")
 
                     if (item.type === 'text') {
                         li.textContent = item.data;
-                    } else if (item.type === 'link' || item.type === 'image' || item.type === 'file') {
+                    }
+                    else if (item.type === 'link' || item.type === 'image' || item.type === 'file') {
                         const link = document.createElement('a');
                         link.href = item.data;
                         link.textContent = item.data;
                         li.appendChild(link);
                     }
+                    
+                    // } else if (item.type === 'link' || item.type === 'image' || item.type === 'file') {
+                    //     const link = document.createElement('a');
+                    //     link.href = item.data;
+                    //     link.textContent = item.data;
+                    //     li.appendChild(link);
+                    // }
                     tabItems.appendChild(li);
                 });
             }
