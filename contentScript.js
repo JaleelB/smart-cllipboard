@@ -1,9 +1,27 @@
 console.log("Content script running")
-function handleCopyEvent(event) {
+
+function parseAndExtractHTML(htmlString){
+  const parser = new DOMParser();
+  const parsedHtml = parser.parseFromString(htmlString, "text/html");
+
+  const links = parsedHtml.querySelectorAll('a').forEach((link) => { links.push({data: link.href, type: 'link'}) });
+  const images = parsedHtml.querySelectorAll('img').forEach((image) => { images.push({data: image.src, type: 'image'}) });
+  const files = parsedHtml.querySelectorAll(
+    'a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".ppt"], a[href$=".pptx"]'
+  ).forEach((file) => { files.push({data: file.href, type: 'file'}) });
+
+  // const links = [...parsedHtml.querySelectorAll('a')].map(link => link.href);
+  // const images = [...parsedHtml.querySelectorAll('img')].map(img => img.src);
+  // const files = [...parsedHtml.querySelectorAll('a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".ppt"], a[href$=".pptx"]')].map(file => file.href);
+
+  return  { links, images, files }
+
+  // data.items.push({ type: "html", data: { links, images, files, text } });
+}
+
+function handleCopyEvent() {
     const data = {
-    //   text: '',
-    //   html: '',
-      items: [],
+      items: []
     };
   
     // Get the selected text, if any
@@ -17,36 +35,11 @@ function handleCopyEvent(event) {
     const selectedHtml = window.getSelection().anchorNode.parentNode.innerHTML.trim();
     console.log(selectedHtml)
     if (selectedHtml) {
-      data.items.push({ type: 'html', data: selectedHtml });
+      const { links, images, files } = parseAndExtractHTML(selectedHtml)
+      console.log(links, images, files)
+      data.items.push({ type: "html", data: { links, images, files } });
     }
-  
-    // Get the copied items, if any
-    const clipboardData = event.clipboardData || window.clipboardData;
-    console.log("clipboard", clipboardData);
-    if (clipboardData) {
-        console.log("clipboard", clipboardData);
-      const types = clipboardData.types;
-      for (let i = 0; i < types.length; i++) {
-        const type = types[i];
-        const item = clipboardData.getData(type);
-        switch (type) {
-          case 'text/plain':
-            data.items.push({ type: 'text', data: item });
-            break;
-          case 'text/html':
-            data.items.push({ type: 'html', data: item });
-            break;
-          case 'image/png':
-          case 'image/jpeg':
-          case 'image/gif':
-            data.items.push({ type: 'image', data: item });
-            break;
-          default:
-            data.items.push({ type: 'file', data: item });
-            break;
-        }
-      }
-    }
+
   
     // Send the data to the background script
     if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
