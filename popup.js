@@ -36,28 +36,37 @@ function showClipboardItems() {
 
         if (response && response.success) {
 
-            const { file, image, link } = response.data;
+            const { file, image, link, text } = response.data;
             console.log(file, image, link)
             const clipboardData = [  
+                ...(text.length > 0 ? text : []),
                 ...(file.length > 0 ? file : []),
                 ...(image.length > 0 ? image : []),
                 ...(link.length > 0 ? link : []),
             ]
+
+            console.log("clipboard data: ", clipboardData)
             
             const activeTab = document.querySelector('.active-tab');
-            const activeTabItems = clipboardData.filter((clipboardItem) => clipboardItem.type === activeTab.textContent);
+            const activeTabItems = clipboardData.filter((clipboardItem) => `${clipboardItem.type}s` === activeTab.textContent || clipboardItem.type === activeTab.textContent);
             activeTabItems.reverse(); // shows the latest addition to the clipboard as the first item
+            console.log(activeTabItems)
 
             if (activeTabItems.length === 0) {
                 const error = document.createElement('div');
                 error.className = 'error';
                 error.textContent = `No ${activeTab.textContent} found in clipboard`;
-                tabItems.style.display = 'grid';
-                tabItems.style.placeItems = 'center'
+                tabItems.style.display = 'flex';
+                tabItems.style.justifyContent = 'center';
+                tabItems.style.alignItems = 'center'
                 tabItems.appendChild(error);
             }else{
+
+                tabItems.style.display = 'flex';
+                tabItems.style.alignItems = 'flex-start'
+
                 activeTabItems.forEach((item) => {
-                    console.log("tab item: ", item)
+                    console.log("tab item: ", item.type)
                     const li = document.createElement('li');
                     li.classList.add("tab-item")
 
