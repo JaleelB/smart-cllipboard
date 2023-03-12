@@ -56,19 +56,17 @@ function showClipboardItems() {
                 const error = document.createElement('div');
                 error.className = 'error';
                 error.textContent = `No ${activeTab.textContent} found in clipboard`;
-                tabItems.style.display = 'flex';
-                tabItems.style.justifyContent = 'center';
-                tabItems.style.alignItems = 'center'
+                tabItems.style.display = 'grid';
+                tabItems.style.placeItems = 'center'
                 tabItems.appendChild(error);
             }else{
 
-                tabItems.style.display = 'flex';
-                tabItems.style.alignItems = 'flex-start'
+                tabItems.style.display = 'block';
 
                 activeTabItems.forEach((item) => {
                     console.log("tab item: ", item.type)
                     const li = document.createElement('li');
-                    li.classList.add("tab-item")
+                    li.classList.add("tab-item");
 
                     if (item.type === 'text') {
                         li.textContent = item.data;
