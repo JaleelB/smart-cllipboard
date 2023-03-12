@@ -1,24 +1,26 @@
 :root{
-    --border-radius: 8px;
-    --border-radius-2: 4px;
+    --border-radius: 16px;
+    --border-radius-2: 8px;
+    --border-radius-3: 4px;
     --gap: 16px;
     --gap-2: 8px;
     --color-white: #ffff;
     --border-color: #ebebeb;
-    --color-primary: #4608ad;
+    --color-primary: #42946D;
+    --transition: all 250ms ease-in-out;
 }
 
 body, html{ padding: 0; margin: 0; }
 
 .container{
-    width: 496px;
-    height: 600px;
+    width: 432px;
+    height: 620px;
     background-color: var(--color-white);
     line-height: 1.5;
 }
 
 header{ 
-    padding: calc(var(--gap-2) * 2); 
+    padding: var(--gap); 
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -76,6 +78,7 @@ header .close:after {
     font-size: .8rem;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .tab{
@@ -85,7 +88,7 @@ header .close:after {
 }
 
 .active-tab{
-    --highlight-color: #f4f1fa;
+    --highlight-color: #f1fdf7;
     border-bottom: 2px solid var(--color-primary);
     color: var(--color-primary);
     background-color: var(--highlight-color);
@@ -94,8 +97,10 @@ header .close:after {
 
 .tab-items{
     min-height: 350px;
-    padding: var(--gap-2); 
+    padding: var(--gap); 
     font-size: 1rem;
+    list-style-type: none;
+    margin: 0;
 }
 
 .tab-item{
@@ -104,6 +109,9 @@ header .close:after {
     padding: var(--gap);
     border-radius: var(--border-radius);
     word-break: break-word;
-    margin-bottom: var(--gap-2);
+    /* margin-bottom: calc(var(--gap) - 4px); */
+    cursor: pointer;
+    transition: var(--transition);
 }
+
 

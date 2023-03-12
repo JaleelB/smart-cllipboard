@@ -30,11 +30,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             console.log(item)
             if (item.type === 'html') {
                 try {
-                    console.log("html", item.data)
+                    // console.log("html", item.data)
 
-                    const { links, images, files } = item.data;
-                    console.log("images: ", images);
-
+                    const { text, links, images, files } = item.data;
+                    // console.log("images: ", images);
+                    
+                    if (text.length > 0) categories.text.push(...text);
                     if (links.length > 0) categories.link.push(...links);
                     if (images.length > 0) categories.image.push(...images);
                     if (files.length > 0) categories.file.push(...files);

@@ -58,10 +58,13 @@ function showClipboardItems() {
                 error.textContent = `No ${activeTab.textContent} found in clipboard`;
                 tabItems.style.display = 'grid';
                 tabItems.style.placeItems = 'center'
+                tabItems.style.gridTemplateColumns = '1fr';
                 tabItems.appendChild(error);
             }else{
 
-                tabItems.style.display = 'block';
+                tabItems.style.display = 'grid';
+                tabItems.style.gap = 'calc(var(--gap) - 4px)';
+                
 
                 activeTabItems.forEach((item) => {
                     console.log("tab item: ", item.type)
@@ -69,21 +72,30 @@ function showClipboardItems() {
                     li.classList.add("tab-item");
 
                     if (item.type === 'text') {
+                        tabItems.style.gridTemplateColumns = '1fr';
                         li.textContent = item.data;
                     }
-                    else if (item.type === 'link' || item.type === 'image' || item.type === 'file') {
+                    else if (item.type === 'link' || item.type === 'file') {
+                        tabItems.style.gridTemplateColumns = '1fr';
                         const link = document.createElement('a');
                         link.href = item.data;
                         link.textContent = item.data;
                         li.appendChild(link);
                     }
-                    
-                    // } else if (item.type === 'link' || item.type === 'image' || item.type === 'file') {
-                    //     const link = document.createElement('a');
-                    //     link.href = item.data;
-                    //     link.textContent = item.data;
-                    //     li.appendChild(link);
-                    // }
+                    else if(item.type === 'image'){
+                        tabItems.style.gridTemplateColumns = '1fr 1fr';
+                        // tabItems.style.gap = "var(--gap-2)"
+
+                        const image = document.createElement('img');
+                        image.src = item.data;
+                        image.style.inlineSize = '100%';
+                        image.style.borderRadius = 'var(--border-radius-2)'
+
+                        li.style.height = '162px';
+                        li.style.width = '162px';
+                        li.style.marginBottom = 0;
+                        li.appendChild(image);
+                    }
                     tabItems.appendChild(li);
                 });
             }

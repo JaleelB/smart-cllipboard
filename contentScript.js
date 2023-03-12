@@ -1,23 +1,17 @@
 console.log("Content script running")
 
 function parseAndExtractHTML(htmlString){
-  const parser = new DOMParser();
-  const parsedHtml = parser.parseFromString(htmlString, "text/html");
+  const parsedHtml = new DOMParser().parseFromString(htmlString, "text/html");
+  const links = Array.from(parsedHtml.querySelectorAll('a')).map(link => ({data: link.href, type: 'link'}));
+  const images = Array.from(parsedHtml.querySelectorAll('img')).map(image => ({data: image.src, type: 'image'}));
+  const files = Array.from(parsedHtml.querySelectorAll('a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".ppt"], a[href$=".pptx"]')).map(file => ({data: file.href, type: 'file'}));
+  const text = Array.from(parsedHtml.querySelectorAll('*'))
+    .filter(node => node.nodeType === Node.TEXT_NODE)
+    .map(textNode => ({data: textNode.textContent, type: 'text'}));
 
-  const links = parsedHtml.querySelectorAll('a').forEach((link) => { links.push({data: link.href, type: 'link'}) });
-  const images = parsedHtml.querySelectorAll('img').forEach((image) => { images.push({data: image.src, type: 'image'}) });
-  const files = parsedHtml.querySelectorAll(
-    'a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".ppt"], a[href$=".pptx"]'
-  ).forEach((file) => { files.push({data: file.href, type: 'file'}) });
-
-  // const links = [...parsedHtml.querySelectorAll('a')].map(link => link.href);
-  // const images = [...parsedHtml.querySelectorAll('img')].map(img => img.src);
-  // const files = [...parsedHtml.querySelectorAll('a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".ppt"], a[href$=".pptx"]')].map(file => file.href);
-
-  return  { links, images, files }
-
-  // data.items.push({ type: "html", data: { links, images, files, text } });
+  return { text, links, images, files };
 }
+
 
 function handleCopyEvent() {
     const data = {
@@ -26,7 +20,7 @@ function handleCopyEvent() {
   
     // Get the selected text, if any
     const selectedText = window.getSelection().toString().trim();
-    console.log(selectedText)
+     
     if (selectedText) {
       data.items.push({ type: 'text', data: selectedText });
     }
@@ -35,9 +29,9 @@ function handleCopyEvent() {
     const selectedHtml = window.getSelection().anchorNode.parentNode.innerHTML.trim();
     console.log(selectedHtml)
     if (selectedHtml) {
-      const { links, images, files } = parseAndExtractHTML(selectedHtml)
-      console.log(links, images, files)
-      data.items.push({ type: "html", data: { links, images, files } });
+      const { text, links, images, files } = parseAndExtractHTML(selectedHtml)
+      console.log(text, links, images, files)
+      data.items.push({ type: "html", data: { text, links, images, files } });
     }
 
   
