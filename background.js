@@ -16,8 +16,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         
         const { items } = request.data;
 
-        console.log("items: ", items)
-
         const categories = {
             text: [],
             link: [],
@@ -79,6 +77,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
 
         });
+        return true;
+    }
+    else if (request.type === 'remove-clipboard-item') {
+
+        const { category, index } = request.data;
+
+        chrome.storage.local.get([category], (result) => {
+            const storedItems = result[category] ?? [];
+            storedItems.splice(index, 1);
+            chrome.storage.local.set({ [category]: storedItems }, () => {
+                sendResponse({ success: true });
+            });
+        });
+        
         return true;
     }
 });
