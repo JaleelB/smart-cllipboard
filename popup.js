@@ -99,10 +99,22 @@ function showClipboardItems() {
 
                     const removeButton = document.createElement('button'); // create remove button
                     removeButton.textContent = 'Remove';
+                    // removeButton.addEventListener('click', deleteItem);
                     removeButton.addEventListener('click', () => {
-                        chrome.runtime.sendMessage({ type: 'remove-clipboard-item', data: { category: item.type, index } });
-                        showClipboardItems(); // refresh the list after removing the item
+                        const listItem = event.target.closest('li');
+                      
+                        // Remove the item from the saved clipboard data
+                        chrome.runtime.sendMessage({ type: 'remove-clipboard-item', data: { category: item.type, index } }, (response) => {
+                          if (response.success) {
+                            // Update the UI after deleting the item
+                            listItem.remove();
+                            showClipboardItems();
+                          } else {
+                            console.error(response.message);
+                          }
+                        });
                     });
+                    
                     li.appendChild(removeButton);
 
                     tabItems.appendChild(li);
@@ -123,12 +135,13 @@ function showClipboardItems() {
             tabItems.appendChild(errorMessage);
         }
     });
+
+    
 }
 
 const closeButton = document.querySelector('.close');
-closeButton.addEventListener('click', () => {
-  window.close();
+    closeButton.addEventListener('click', () => {
+    window.close();
 });
-
 setActiveTab(activeTabIndex)
 showClipboardItems();// render the clipboard items on popup load

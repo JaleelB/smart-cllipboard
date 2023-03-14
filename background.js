@@ -83,13 +83,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         const { category, index } = request.data;
 
-        chrome.storage.local.get([category], (result) => {
-            const storedItems = result[category] ?? [];
-            storedItems.splice(index, 1);
-            chrome.storage.local.set({ [category]: storedItems }, () => {
-                sendResponse({ success: true });
-            });
-        });
+        // chrome.storage.local.get([category], (result) => {
+        //     const storedItems = result[category] ?? [];
+        //     storedItems.splice(index, 1);
+        //     chrome.storage.local.set({ [category]: storedItems }, () => {
+        //         sendResponse({ success: true });
+        //     });
+        // });
+
+        switch (category) {
+            case 'text':
+            case 'link':
+            case 'image':
+            case 'file':
+                chrome.storage.local.get([category], (result) => {
+                    const storedItems = result[category] ?? [];
+                    storedItems.splice(index, 1);
+                    chrome.storage.local.set({ [category]: storedItems }, () => {
+                        sendResponse({ success: true });
+                    });
+                });
+                break;
+            default:
+                console.error('Invalid category:', category);
+                sendResponse({ success: false });
+                break;
+        }
         
         return true;
     }
