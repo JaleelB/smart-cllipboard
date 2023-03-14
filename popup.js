@@ -63,11 +63,12 @@ function showClipboardItems() {
             }else{
 
                 tabItems.style.display = 'grid';
+                tabItems.style.placeItems = 'normal'
                 tabItems.style.gap = 'calc(var(--gap) - 4px)';
                 
 
-                activeTabItems.forEach((item) => {
-                    console.log("tab item: ", item.type)
+                activeTabItems.forEach((item, index) => {
+                    
                     const li = document.createElement('li');
                     li.classList.add("tab-item");
 
@@ -84,7 +85,6 @@ function showClipboardItems() {
                     }
                     else if(item.type === 'image'){
                         tabItems.style.gridTemplateColumns = '1fr 1fr';
-                        // tabItems.style.gap = "var(--gap-2)"
 
                         const image = document.createElement('img');
                         image.src = item.data;
@@ -96,6 +96,15 @@ function showClipboardItems() {
                         li.style.marginBottom = 0;
                         li.appendChild(image);
                     }
+
+                    const removeButton = document.createElement('button'); // create remove button
+                    removeButton.textContent = 'Remove';
+                    removeButton.addEventListener('click', () => {
+                        chrome.runtime.sendMessage({ type: 'remove-clipboard-item', data: { category: item.type, index } });
+                        showClipboardItems(); // refresh the list after removing the item
+                    });
+                    li.appendChild(removeButton);
+
                     tabItems.appendChild(li);
                 });
             }
